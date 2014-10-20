@@ -32,14 +32,9 @@ function Path(to, ref) {
     this.ref = ref;
 }
 
-function PathInfo(from, ref, path) {
+function PathInfo(from, path) {
     this.from = from;
-
-    if (ref !== null) {
-        this.path = path.concat([ref]);
-    } else {
-        this.path = path;
-    }
+    this.path = path;
 }
 
 Problem.prototype.evaluateSubphrases = function () {
@@ -101,39 +96,43 @@ Problem.prototype.initLengths = function () {
 };
 
 Problem.prototype.solve = function () {
-    var solution = [],
-           stack = [new PathInfo(0, null, [])],
-               L = this.number.length,
-           step;
+    var S = Number.MAX_VALUE,
+        L = this.number.length,
+        solution,
+        stack,
+        step,
+        Lp;
 
     if (this.valid) {
+        stack = [new PathInfo(0, [])];
+
         while (stack.length > 0) {
             step = stack.pop();
+            Lp = this.lengths[step.from] = step.path.length;
 
-            if (this.lengths[step.from] > step.path.length) {
-                this.lengths[step.from] = step.path.length;
+            if (step.from < L) {
+                var directions = this.paths[step.from];
 
-                if (step.from < L) {
-                    var directions = this.paths[step.from];
+                for (var i = 0; i < directions.length; i++) {
+                    var path = directions[i];
 
-                    for (var i = 0; i < directions.length; i++) {
-                        var path = directions[i];
-                        stack.push(new PathInfo(path.to, path.ref, step.path));
-                    }
-                } else if (step.from === L) {
-                    if (solution.length === 0 || solution.length > step.path.length) {
-                        solution = step.path;
+                    if (this.lengths[path.to] > (Lp + 1)) {
+                        stack.push(new PathInfo(path.to, step.path.concat([path.ref])));
                     }
                 }
+            }
+
+            if (step.from === L && S > Lp) {
+                solution = step.path;
             }
         }
     }
 
-    return solution;
+    return solution || [];
 };
 
 (function main() {
-    var problem, shouldContinue;
+    var problem, solution;
 
     function writeSolution(solution) {
         if (solution.length === 0) {
