@@ -1,28 +1,30 @@
 #include <stdio.h>
 #include <math.h>
 
-double score(double x, double n, double M) {
-    return round(10 * (x * n + M) / (n + M)) * 0.1;
+#define E049 0.049999999
+
+double score(double n, double x, double m) {
+    return 0.1 * round(10*(n*x+m)/(n+m));
 }
 
 int main() {
-    double x, y, n, M;
+    double x, y, y1;
+    int M, n;
 
-    scanf("%lf %lf %lf", &x, &y, &n);
-    x = round(x * 10) * 0.1;
-    y = round(y * 10) * 0.1;
-    y += 0.05;
+    scanf("%lf %lf %d", &x, &y, &n);
 
-    if (x < y) {
-        x = y;
+    if (x > y) {
+        y1 = y + E049;
+        M = (int)(ceil(n * (x - y1) / (y1 - 1.0)));
+
+        while (score(n, x, M) <= y) {
+            M--;
+        }
+        M++;
+    } else {
+        M = 0;
     }
 
-    M = floor(n * (x-y)/(y-1));
-
-    while (score(x, n, M) > y) {
-        M += 1.0;
-    }
-
-    printf("%d\n", (int)M);
+    printf("%d\n", M);
     return 0;
 }
